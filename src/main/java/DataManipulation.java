@@ -12,19 +12,21 @@ import org.apache.arrow.vector.VectorSchemaRoot;
 
 public class DataManipulation {
   public static final RootAllocator allocator = new RootAllocator(Long.MAX_VALUE);
+  final VarCharVector nameVector = new VarCharVector("name", allocator);
+  final VarCharVector teamVector = new VarCharVector("team", allocator);
+  final VarCharVector positionVector = new VarCharVector("position",allocator);
+  final VarCharVector heightVector = new VarCharVector("height", allocator);
+  final VarCharVector weightVector = new VarCharVector("weight", allocator);
+  final VarCharVector  ageVector = new VarCharVector("age", allocator);
 
-  public List<FieldVector> readCSVFile(String path) throws FileNotFoundException {
-    final VarCharVector nameVector = new VarCharVector("name", allocator);
-    final VarCharVector teamVector = new VarCharVector("team", allocator);
-    final VarCharVector positionVector = new VarCharVector("position", allocator);
-    final VarCharVector heightVector = new VarCharVector("height", allocator);
-    final VarCharVector weightVector = new VarCharVector("weight", allocator);
-    final VarCharVector ageVector = new VarCharVector("age", allocator);
+  public void readCSVFile(String path) throws FileNotFoundException {
     String line;
-    try (BufferedReader br = new BufferedReader(new FileReader(path))) {
+
+    try {
       int i = 0;
+      BufferedReader br = new BufferedReader(new FileReader(path));
       while ((line = br.readLine()) != null) {
-        String[] values = line.split(",");
+        String [] values = line.split(",");
         nameVector.setSafe(i, values[0].getBytes());
         teamVector.setSafe(i, values[1].getBytes());
         positionVector.setSafe(i, values[2].getBytes());
@@ -33,19 +35,17 @@ public class DataManipulation {
         ageVector.setSafe(i, values[5].getBytes());
         ++i;
       }
-    } catch (IOException ex) {
-      ex.printStackTrace();
+    } catch (IOException e) {
+      e.printStackTrace();
     }
-    List<FieldVector> list = asList(nameVector, teamVector,
-      positionVector, heightVector, weightVector, ageVector);
-    return list;
   }
 
-  public VectorSchemaRoot vectorToAVectorSchemaRoot(List list){
-    try(final VectorSchemaRoot vectorSchemaRoot = new VectorSchemaRoot(list)) {
+  public VectorSchemaRoot vectorToAVectorSchemaRoot(){
+    List<FieldVector> list = asList(nameVector, teamVector,
+        positionVector, heightVector, weightVector, ageVector);
+    final VectorSchemaRoot vectorSchemaRoot = new VectorSchemaRoot(list);
       vectorSchemaRoot.setRowCount(1035);
       return vectorSchemaRoot;
-    }
   }
 
   public void vectorSchemaRootToACsvFileTransform(VectorSchemaRoot vectorSchemaRoot) {
@@ -57,25 +57,26 @@ public class DataManipulation {
     VarCharVector vectorAge = (VarCharVector) vectorSchemaRoot.getVector(5);
     int aux = 0;
     try {
-      FileWriter csvWriter = new FileWriter("result.csv");
-      while (aux < 1036) {
-       csvWriter.append((CharSequence) vectorName.getObject(aux));
-       csvWriter.append(",");
-       csvWriter.append((CharSequence) vectorTeam.getObject(aux));
-       csvWriter.append(",");
-       csvWriter.append((CharSequence) vectorPosition.getObject(aux));
-       csvWriter.append(",");
-       csvWriter.append((CharSequence) vectorHeight.getObject(aux));
-       csvWriter.append(",");
-       csvWriter.append((CharSequence) vectorWeight.getObject(aux));
-       csvWriter.append(",");
-       csvWriter.append((CharSequence) vectorAge.getObject(aux));
+      FileWriter csvWriter = new FileWriter("mlb_players_result.csv");
+      while (aux < 1035) {
+        csvWriter.append(vectorName.getObject(aux).toString());
+        csvWriter.append(",");
+        csvWriter.append(vectorTeam.getObject(aux).toString());
+        csvWriter.append(",");
+        csvWriter.append(vectorPosition.getObject(aux).toString());
+        csvWriter.append(",");
+        csvWriter.append(vectorHeight.getObject(aux).toString());
+        csvWriter.append(",");
+        csvWriter.append(vectorWeight.getObject(aux).toString());
+        csvWriter.append(",");
+        csvWriter.append(vectorAge.getObject(aux).toString());
+        csvWriter.append("\n");
         ++aux;
       }
+      csvWriter.flush();
       csvWriter.close();
     } catch (IOException e) {
       e.printStackTrace();
     }
   }
 }
-
