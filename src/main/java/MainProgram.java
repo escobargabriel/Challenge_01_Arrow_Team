@@ -1,12 +1,12 @@
 import java.io.FileNotFoundException;
+import java.util.List;
+import org.apache.arrow.vector.VectorSchemaRoot;
 
 public class MainProgram {
   public static void main(String[] args) throws FileNotFoundException {
-    String path = "/home/gabriel/simbiose/Challenge-01/mlb_players.csv";
     DataManipulation data = new DataManipulation();
-
-    data.readCSVFile(path);
-    data.vectorToAVectorSchemaRoot();
-
+    List list = data.readCSVFile(args[0]);
+    VectorSchemaRoot vectorSchemaRoot = data.vectorToAVectorSchemaRoot(list);
+    data.vectorSchemaRootToACsvFileTransform(vectorSchemaRoot);
   }
 }
