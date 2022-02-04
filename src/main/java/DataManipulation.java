@@ -16,29 +16,29 @@ public class DataManipulation {
   public List<FieldVector> readCSVFile(String path) throws FileNotFoundException {
     final VarCharVector nameVector = new VarCharVector("name", allocator);
     final VarCharVector teamVector = new VarCharVector("team", allocator);
-    final VarCharVector positionVector = new VarCharVector("position",allocator);
+    final VarCharVector positionVector = new VarCharVector("position", allocator);
     final VarCharVector heightVector = new VarCharVector("height", allocator);
     final VarCharVector weightVector = new VarCharVector("weight", allocator);
-    final VarCharVector  ageVector = new VarCharVector("age", allocator);
+    final VarCharVector ageVector = new VarCharVector("age", allocator);
     String line;
-      try (BufferedReader br = new BufferedReader(new FileReader(path))) {
-        int i = 0;
-        while ((line = br.readLine()) != null) {
-          String[] values = line.split(",");
-          nameVector.setSafe(i, values[0].getBytes());
-          teamVector.setSafe(i, values[1].getBytes());
-          positionVector.setSafe(i, values[2].getBytes());
-          heightVector.setSafe(i, values[3].getBytes());
-          weightVector.setSafe(i, values[4].getBytes());
-          ageVector.setSafe(i, values[5].getBytes());
-          ++i;
-        }
-      } catch (IOException ex) {
-        ex.printStackTrace();
+    try (BufferedReader br = new BufferedReader(new FileReader(path))) {
+      int i = 0;
+      while ((line = br.readLine()) != null) {
+        String[] values = line.split(",");
+        nameVector.setSafe(i, values[0].getBytes());
+        teamVector.setSafe(i, values[1].getBytes());
+        positionVector.setSafe(i, values[2].getBytes());
+        heightVector.setSafe(i, values[3].getBytes());
+        weightVector.setSafe(i, values[4].getBytes());
+        ageVector.setSafe(i, values[5].getBytes());
+        ++i;
       }
+    } catch (IOException ex) {
+      ex.printStackTrace();
+    }
     List<FieldVector> list = asList(nameVector, teamVector,
-        positionVector, heightVector, weightVector, ageVector);
-      return list;
+      positionVector, heightVector, weightVector, ageVector);
+    return list;
   }
 
   public VectorSchemaRoot vectorToAVectorSchemaRoot(List list){
