@@ -12,19 +12,17 @@ import org.apache.arrow.vector.VectorSchemaRoot;
 
 public class DataManipulation {
   public static final RootAllocator allocator = new RootAllocator(Long.MAX_VALUE);
-  final VarCharVector nameVector = new VarCharVector("name", allocator);
-  final VarCharVector teamVector = new VarCharVector("team", allocator);
-  final VarCharVector positionVector = new VarCharVector("position",allocator);
-  final VarCharVector heightVector = new VarCharVector("height", allocator);
-  final VarCharVector weightVector = new VarCharVector("weight", allocator);
-  final VarCharVector  ageVector = new VarCharVector("age", allocator);
 
-  public void readCSVFile(String path) throws FileNotFoundException {
+  public List readCSVFile(String path) throws FileNotFoundException {
     String line;
-
-    try {
+    final VarCharVector nameVector = new VarCharVector("name", allocator);
+    final VarCharVector teamVector = new VarCharVector("team", allocator);
+    final VarCharVector positionVector = new VarCharVector("position",allocator);
+    final VarCharVector heightVector = new VarCharVector("height", allocator);
+    final VarCharVector weightVector = new VarCharVector("weight", allocator);
+    final VarCharVector  ageVector = new VarCharVector("age", allocator);
+    try (BufferedReader br = new BufferedReader(new FileReader(path))) {
       int i = 0;
-      BufferedReader br = new BufferedReader(new FileReader(path));
       while ((line = br.readLine()) != null) {
         String [] values = line.split(",");
         nameVector.setSafe(i, values[0].getBytes());
@@ -38,14 +36,15 @@ public class DataManipulation {
     } catch (IOException e) {
       e.printStackTrace();
     }
-  }
-
-  public VectorSchemaRoot vectorToAVectorSchemaRoot(){
     List<FieldVector> list = asList(nameVector, teamVector,
         positionVector, heightVector, weightVector, ageVector);
+    return list;
+  }
+
+  public VectorSchemaRoot vectorToAVectorSchemaRoot(List list){
     final VectorSchemaRoot vectorSchemaRoot = new VectorSchemaRoot(list);
-      vectorSchemaRoot.setRowCount(1035);
-      return vectorSchemaRoot;
+    vectorSchemaRoot.setRowCount(1035);
+    return vectorSchemaRoot;
   }
 
   public void vectorSchemaRootToACsvFileTransform(VectorSchemaRoot vectorSchemaRoot) {
