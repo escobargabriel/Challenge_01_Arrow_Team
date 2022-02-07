@@ -1,26 +1,34 @@
-import static java.util.Arrays.asList;
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.List;
-import org.apache.arrow.memory.RootAllocator;
-import org.apache.arrow.vector.FieldVector;
-import org.apache.arrow.vector.VarCharVector;
-import org.apache.arrow.vector.VectorSchemaRoot;
+  import static java.util.Arrays.asList;
+  import java.io.BufferedReader;
+  import java.io.FileNotFoundException;
+  import java.io.FileReader;
+  import java.io.FileWriter;
+  import java.io.IOException;
+  import java.util.List;
+  import org.apache.arrow.memory.RootAllocator;
+  import org.apache.arrow.vector.FieldVector;
+  import org.apache.arrow.vector.VarCharVector;
+  import org.apache.arrow.vector.VectorSchemaRoot;
 
 public class DataManipulation {
   public static final RootAllocator allocator = new RootAllocator(Long.MAX_VALUE);
+  VarCharVector nameVector = null;
+  VarCharVector teamVector = null;
+  VarCharVector positionVector = null;
+  VarCharVector heightVector = null;
+  VarCharVector weightVector = null;
+  VarCharVector  ageVector = null;
+  int rowCount = 0;
 
   public List readCSVFile(String path) throws FileNotFoundException {
     String line;
-    final VarCharVector nameVector = new VarCharVector("name", allocator);
-    final VarCharVector teamVector = new VarCharVector("team", allocator);
-    final VarCharVector positionVector = new VarCharVector("position",allocator);
-    final VarCharVector heightVector = new VarCharVector("height", allocator);
-    final VarCharVector weightVector = new VarCharVector("weight", allocator);
-    final VarCharVector  ageVector = new VarCharVector("age", allocator);
+    nameVector     = new VarCharVector("name",     allocator);
+    teamVector     = new VarCharVector("team",     allocator);
+    positionVector = new VarCharVector("position", allocator);
+    heightVector   = new VarCharVector("height",   allocator);
+    weightVector   = new VarCharVector("weight",   allocator);
+    ageVector      = new VarCharVector("age",      allocator);
+    List<FieldVector> list ;
     try (BufferedReader br = new BufferedReader(new FileReader(path))) {
       int i = 0;
       while ((line = br.readLine()) != null) {
@@ -32,43 +40,43 @@ public class DataManipulation {
         weightVector.setSafe(i, values[4].getBytes());
         ageVector.setSafe(i, values[5].getBytes());
         ++i;
+        rowCount = i;
       }
     } catch (IOException e) {
       e.printStackTrace();
     }
-    List<FieldVector> list = asList(nameVector, teamVector,
-        positionVector, heightVector, weightVector, ageVector);
-    return list;
+    return list = asList(nameVector, teamVector,
+            positionVector, heightVector, weightVector, ageVector);
   }
 
-  public VectorSchemaRoot vectorToAVectorSchemaRoot(List list){
+  public VectorSchemaRoot vectorToAVectorSchemaRoot(List<FieldVector> list){
     final VectorSchemaRoot vectorSchemaRoot = new VectorSchemaRoot(list);
-    vectorSchemaRoot.setRowCount(1035);
+    vectorSchemaRoot.setRowCount(rowCount);
     return vectorSchemaRoot;
   }
 
   public void vectorSchemaRootToACsvFileTransform(VectorSchemaRoot vectorSchemaRoot) {
-    VarCharVector vectorName = (VarCharVector) vectorSchemaRoot.getVector(0);
-    VarCharVector vectorTeam = (VarCharVector) vectorSchemaRoot.getVector(1);
-    VarCharVector vectorPosition = (VarCharVector) vectorSchemaRoot.getVector(2);
-    VarCharVector vectorHeight = (VarCharVector) vectorSchemaRoot.getVector(3);
-    VarCharVector vectorWeight = (VarCharVector) vectorSchemaRoot.getVector(4);
-    VarCharVector vectorAge = (VarCharVector) vectorSchemaRoot.getVector(5);
+    VarCharVector nameValuesFromVectorSchema = (VarCharVector) vectorSchemaRoot.getVector(0);
+    VarCharVector teamValuesFromVectorSchema = (VarCharVector) vectorSchemaRoot.getVector(1);
+    VarCharVector positionValuesFromVectorSchema = (VarCharVector) vectorSchemaRoot.getVector(2);
+    VarCharVector heightValuesFromVectorSchema = (VarCharVector) vectorSchemaRoot.getVector(3);
+    VarCharVector weightValuesFromVectorSchema = (VarCharVector) vectorSchemaRoot.getVector(4);
+    VarCharVector ageValuesFromVectorSchema = (VarCharVector) vectorSchemaRoot.getVector(5);
     int aux = 0;
     try {
       FileWriter csvWriter = new FileWriter("mlb_players_result.csv");
-      while (aux < 1035) {
-        csvWriter.append(vectorName.getObject(aux).toString());
+      while (aux < rowCount) {
+        csvWriter.append(nameValuesFromVectorSchema.getObject(aux).toString());
         csvWriter.append(",");
-        csvWriter.append(vectorTeam.getObject(aux).toString());
+        csvWriter.append(teamValuesFromVectorSchema.getObject(aux).toString());
         csvWriter.append(",");
-        csvWriter.append(vectorPosition.getObject(aux).toString());
+        csvWriter.append(positionValuesFromVectorSchema.getObject(aux).toString());
         csvWriter.append(",");
-        csvWriter.append(vectorHeight.getObject(aux).toString());
+        csvWriter.append(heightValuesFromVectorSchema.getObject(aux).toString());
         csvWriter.append(",");
-        csvWriter.append(vectorWeight.getObject(aux).toString());
+        csvWriter.append(weightValuesFromVectorSchema.getObject(aux).toString());
         csvWriter.append(",");
-        csvWriter.append(vectorAge.getObject(aux).toString());
+        csvWriter.append(ageValuesFromVectorSchema.getObject(aux).toString());
         csvWriter.append("\n");
         ++aux;
       }
