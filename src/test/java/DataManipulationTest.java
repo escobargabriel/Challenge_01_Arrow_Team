@@ -1,3 +1,4 @@
+
 class DataManipulationTest {
 
   @org.junit.jupiter.api.Test
